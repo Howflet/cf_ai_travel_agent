@@ -45,18 +45,20 @@
 - [x] Workers AI: Response synthesis
 - [x] Frontend: Chat UI with WebSocket connection
 - [x] Frontend: Loading/typing indicators
-- [ ] End-to-end integration testing
+- [x] End-to-end integration testing
+- [x] Documentation finalization (README, PROMPTS, .gitignore)
 
 ---
 
 ## Completed Features
 
 - [x] `tracker.md` created
-- [x] `PROMPTS.md` created
-- [x] `README.md` created
+- [x] `PROMPTS.md` created (9 prompts logged)
+- [x] `README.md` — comprehensive setup instructions & architecture
+- [x] `.gitignore` — `.dev.vars` + node_modules excluded
 - [x] Project scaffolding (Wrangler Worker + Vite/React frontend)
 - [x] Durable Object: ChatSession with Hibernation API, durable history, Workers AI
-- [x] TravelAgentWorkflow: 7-step multi-API orchestration + callback
+- [x] TravelAgentWorkflow: 8-step multi-API orchestration + callback
 - [x] Workers AI: Single combined intent+response call with keyword gating
 - [x] Workers AI: Response synthesis (`synthesizeResearchResponse`)
 - [x] Frontend: Chat UI (React/Vite, Tailwind, lucide-react, `useChat` hook)
@@ -65,4 +67,4 @@
 
 ## Known Bugs
 
-_None yet._
+_None._

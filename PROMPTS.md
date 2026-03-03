@@ -223,3 +223,20 @@ Review `tracker.md`. We are now going to implement "The Voice: Intent Parsing" t
 </details>
 
 **Result:** (1) `useChat.ts` custom hook — WebSocket lifecycle with `crypto.randomUUID()` session IDs, exponential backoff (1s–30s), handles message/status/history/error types. (2) `App.tsx` — dark gradient UI with glassmorphism, Plane/Bot/User/Send icons, message bubbles (right-aligned blue for user, left-aligned translucent for assistant), animated spinner status, suggestion chips, connection indicator. (3) `vite.config.ts` — `@tailwindcss/vite` plugin + `/api` proxy with `ws: true`. (4) Inter font via Google Fonts, SEO meta tags.
+
+---
+
+## Prompt 9 — Documentation for Local Review (2026-03-03)
+
+**Purpose:** Finalize all documentation for local review by evaluators. No live deployment — the repo must have flawless local setup instructions.
+
+<details>
+<summary>Full prompt</summary>
+
+1. Finalize PROMPTS.md — ensure every prompt is logged.
+2. Finalize README.md — project description, architecture, detailed local setup (prerequisites, clone, install, .dev.vars, wrangler dev, npm run dev).
+3. Clean up — no hardcoded API keys, .dev.vars in .gitignore.
+
+</details>
+
+**Result:** (1) Verified all 9 prompts are logged in `PROMPTS.md`. (2) Wrote comprehensive `README.md` with architecture ASCII diagram, technology table, 6-step local setup instructions, free-tier API key links, and project structure. (3) Created root `.gitignore` with `.dev.vars` excluded. (4) Cleaned `wrangler.toml` — removed empty placeholder API key vars that would shadow `.dev.vars`. (5) Security audit: confirmed zero hardcoded API keys in source (all via `this.env.*`). (6) Updated `tracker.md` — all items marked complete.
