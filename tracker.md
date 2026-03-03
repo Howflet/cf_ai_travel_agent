@@ -35,14 +35,14 @@
 ## To-Do Features
 
 - [x] Project scaffolding (Wrangler + Vite/React)
-- [/] Durable Object: WebSocket server & chat history storage
-- [ ] Workflow: Amadeus flight search (`step.do()`)
-- [ ] Workflow: Amadeus hotel search (`step.do()`)
-- [ ] Workflow: Foursquare activity search (`step.do()`)
-- [ ] Workflow: Travel Advisory lookup (`step.do()`)
-- [ ] Workflow: OpenWeatherMap weather lookup (`step.do()`)
-- [ ] Workers AI: Intent parsing (destination, budget, dates)
-- [ ] Workers AI: Response synthesis
+- [x] Durable Object: WebSocket server & chat history storage
+- [x] Workflow: Amadeus flight search (`step.do()`)
+- [x] Workflow: Amadeus hotel search (`step.do()`)
+- [x] Workflow: Foursquare activity search (`step.do()`)
+- [x] Workflow: Travel Advisory lookup (`step.do()`)
+- [x] Workflow: OpenWeatherMap weather lookup (`step.do()`)
+- [/] Workers AI: Intent parsing (destination, budget, dates)
+- [/] Workers AI: Response synthesis
 - [ ] Frontend: Chat UI with WebSocket connection
 - [ ] Frontend: Loading/typing indicators
 - [ ] End-to-end integration testing
@@ -55,6 +55,10 @@
 - [x] `PROMPTS.md` created
 - [x] `README.md` created
 - [x] Project scaffolding (Wrangler Worker + Vite/React frontend)
+- [x] Durable Object: ChatSession with Hibernation API, durable history, Workers AI
+- [x] TravelAgentWorkflow: 7-step multi-API orchestration + callback
+- [/] Workers AI: Intent parsing (`parseUserIntent`) + Scenario A/B branching
+- [/] Workers AI: Response synthesis (`synthesizeResearchResponse`)
 
 ---
 

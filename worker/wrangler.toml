@@ -20,12 +20,20 @@ new_classes = ["ChatSession"]
 
 # ── Workflows ──────────────────────────────────────────────
 [[workflows]]
-name = "travel-research"
-binding = "TRAVEL_RESEARCH_WORKFLOW"
-class_name = "TravelResearchWorkflow"
+name = "travel-agent-workflow"
+binding = "TRAVEL_WORKFLOW"
+class_name = "TravelAgentWorkflow"
 
 # ── Environment Variables (secrets set via `wrangler secret put`) ──
 # AMADEUS_API_KEY
 # AMADEUS_API_SECRET
 # FOURSQUARE_API_KEY
 # OPENWEATHERMAP_API_KEY
+
+[vars]
+# Placeholder dev values — real keys go in via `wrangler secret put`
+WORKER_BASE_URL = "http://localhost:8787"
+AMADEUS_API_KEY = ""
+AMADEUS_API_SECRET = ""
+FOURSQUARE_API_KEY = ""
+OPENWEATHERMAP_API_KEY = ""

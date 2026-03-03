@@ -86,3 +86,121 @@ Stop and ask for my review once the Durable Object is implemented and `wrangler.
 </details>
 
 **Result:** Implemented `ChatSession.ts` with WebSocket upgrade, durable chat history, and Workers AI integration. Updated `index.ts` routing and verified `wrangler.toml` bindings.
+
+---
+
+## Prompt 3 — Hibernation API Refactor (2026-03-03)
+
+**Purpose:** Refactor ChatSession to use the correct Cloudflare Hibernation API pattern.
+
+<details>
+<summary>Full prompt</summary>
+
+With Cloudflare's Hibernation API acceptWebSocket, the recommended pattern is to use the webSocketMessage() handler method on the class instead.
+
+</details>
+
+**Result:** Replaced `addEventListener` with class-level `webSocketMessage()`, `webSocketClose()`, and `webSocketError()` handlers. Added history rehydration inside `webSocketMessage()` for post-hibernation wake-up.
+
+---
+
+## Prompt 4 — Workflow Action Engine (2026-03-03)
+
+**Purpose:** Implement the TravelAgentWorkflow for multi-step external API orchestration.
+
+<details>
+<summary>Full prompt</summary>
+
+Review `tracker.md`. We are now going to implement "The Action Engine" of our chatbot: The Cloudflare Workflow that fetches external API data. Update `PROMPTS.md` with this prompt and move "API Orchestration (Workflows)" to "In Progress".
+
+1. **Define the Workflow (`src/workflow.ts`):**
+   - Create a class `TravelAgentWorkflow` that extends `WorkflowEntrypoint<Env, TravelParams>`.
+   - Define the `TravelParams` interface: `{ destination: string, startDate: string, endDate: string, budget: number }`.
+   - In the `run(event, step)` method, implement the following steps using `await step.do()`:
+     - **Step 1: Geocoding:** Fetch lat/lon for the destination (OpenWeatherMap geocoding endpoint).
+     - **Step 2: Weather:** Fetch 5-day forecast using coordinates from Step 1.
+     - **Step 3: Advisories:** Fetch travel advisories from `https://www.travel-advisory.info/api`.
+     - **Step 4: Amadeus Auth:** Fetch bearer token using `env.AMADEUS_API_KEY` and `env.AMADEUS_API_SECRET`.
+     - **Step 5: Flights & Hotels:** Use the token to fetch flight offers and hotel listings.
+     - **Step 6: Activities:** Fetch top POIs using Foursquare API and coordinates from Step 1.
+   - Return a single aggregated JSON object.
+
+2. **Update the Durable Object (`src/ChatSession.ts`):**
+   - If the message includes the word "plan", trigger the workflow.
+   - Trigger: `await this.env.TRAVEL_WORKFLOW.create({ id: sessionId, params: mockTravelParams })`.
+   - Send status updates via WebSocket during workflow execution.
+
+3. **Wrangler Configuration:**
+   - Update `wrangler.toml` with `[[workflows]]` binding named `TRAVEL_WORKFLOW`, class `TravelAgentWorkflow`.
+   - Declare API env vars with blank placeholders in `[vars]`.
+
+</details>
+
+**Result:** Created `workflow.ts` with `TravelAgentWorkflow` (6 durable steps with graceful error handling). Updated `ChatSession.ts` to detect "plan" and trigger workflow. Updated `wrangler.toml` with `TRAVEL_WORKFLOW` binding and `[vars]` placeholders.
+
+---
+
+## Prompt 5 — Critical Bug Fixes (2026-03-03)
+
+**Purpose:** Fix 4 architectural and correctness issues identified during code review.
+
+<details>
+<summary>Full prompt</summary>
+
+1. Polling with setTimeout inside a Durable Object (ChatSession.ts:124): holds execution context open for up to 60 seconds, defeating Hibernation API and risking CPU limits. Fix: use alarms.
+2. History corruption on synthesis (ChatSession.ts:143–146): push/pop pattern on this.messages is fragile. Fix: separate messages array for synthesis.
+3. API keys exposed in workflow step results (workflow.ts:31, 50): OPENWEATHERMAP_API_KEY embedded in URL strings could leak via workflow logs. Fix: sanitize.
+4. Broken IATA code derivation (workflow.ts:136): destination.substring(0,3).toUpperCase() is wrong for most cities. Fix: Amadeus city/airport search API.
+
+</details>
+
+**Result:** (1) Replaced setTimeout polling with `alarm()` + `ctx.storage.setAlarm()` — DO returns immediately, checks status every 2s via alarms. (2) `synthesizeResearchResponse()` builds standalone messages array without modifying `this.messages`. (3) URLs built with `URLSearchParams`, error messages sanitized with regex to strip `appid=` values. (4) Added Step 4b (`resolve-iata-code`) using Amadeus `/v1/reference-data/locations` endpoint.
+
+---
+
+## Prompt 6 — LLM Intent Parsing & Workflow Callback (2026-03-03)
+
+**Purpose:** Replace hardcoded "plan" keyword detection with intelligent LLM-based intent parsing and implement a non-blocking workflow callback mechanism.
+
+<details>
+<summary>Full prompt</summary>
+
+Review `tracker.md`. We are now going to implement "The Voice: Intent Parsing" to make our chatbot conversational. Update `PROMPTS.md` with this prompt and move "LLM Intent Parsing" to "In Progress".
+
+1. **Implement the Intent Parser Function:**
+   - Create a helper method `parseUserIntent(userMessage: string)` inside `ChatSession`.
+   - Call Workers AI (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`).
+   - Use this exact System Prompt: "You are a travel parameter extractor. Extract the destination, startDate (YYYY-MM-DD), endDate (YYYY-MM-DD), and budget (integer USD) from the user's input. The current date is March 2026. Respond ONLY with a raw JSON object containing these exact keys: 'destination', 'startDate', 'endDate', 'budget'. If any piece of information is missing, set its value to null. Do not include markdown formatting or extra text."
+   - Parse the resulting string into a TypeScript object/interface.
+
+2. **Update the Message Handling Logic:**
+   - Pass the full chat history to `parseUserIntent`.
+   - **Scenario A (Missing Data):** If any required field is null, call Workers AI to ask the user for the missing details conversationally.
+   - **Scenario B (Complete Data):** Trigger the Workflow with the parsed parameters.
+
+3. **Handle Workflow Completion (The Callback):**
+   - Add a new `fetch` route to the DO (POST `/api/workflow-complete`).
+   - Instruct the `TravelAgentWorkflow` to make a fetch request to this endpoint when finished, passing the aggregated JSON as payload.
+   - When the DO receives this payload, it runs Phase 2: Synthesis to summarize the itinerary and push it to the user over WebSocket.
+
+</details>
+
+**Result:** (1) Added `parseUserIntent()` using the exact system prompt — sends full conversation history to LLM, parses JSON with markdown fence stripping. (2) Scenario A: `askForMissingDetails()` generates natural follow-up questions. Scenario B: `triggerWorkflow()` starts workflow with parsed params. (3) Removed alarm-based polling; workflow now POSTs results to `/api/workflow-complete` via a final `callback-to-session` step. Added `callbackSessionId` to `TravelParams`. Updated `index.ts` routing for the callback endpoint.
+
+---
+
+## Prompt 7 — Security, Performance & Type-Safety Fixes (2026-03-03)
+
+**Purpose:** Fix 4 issues: unauthenticated callback, hardcoded hostname, double LLM calls, and TravelParams type mismatch.
+
+<details>
+<summary>Full prompt</summary>
+
+1. Unauthenticated /api/workflow-complete: Anyone can POST fabricated results. Fix: shared secret per invocation.
+2. Hardcoded "https://cf-ai-travel-agent.workers.dev": Won't work in local dev. Fix: WORKER_BASE_URL env var.
+3. Every message triggers 2 LLM calls (parseUserIntent then askForMissingDetails). Fix: single combined call or keyword gate.
+4. TravelParams type mismatch: DO spreads callbackSessionId into a type that doesn't include it. Fix: proper interface hierarchy.
+
+</details>
+
+**Result:** (1) Per-invocation `callbackToken` generated via `crypto.getRandomValues()`, stored in DO storage, sent in `X-Callback-Token` header, verified + cleared on receipt. (2) `WORKER_BASE_URL` added to `Env` and `wrangler.toml [vars]` (defaults to `http://localhost:8787`). (3) `TRAVEL_KEYWORDS` regex gates intent parsing; `parseIntentAndRespond()` returns both params + reply in one call. (4) Split into `TravelSearchParams` (user-facing) and `TravelParams extends TravelSearchParams` (adds `callbackSessionId` + `callbackToken`).
