@@ -34,8 +34,8 @@
 
 ## To-Do Features
 
-- [ ] Project scaffolding (Wrangler + Vite/React)
-- [ ] Durable Object: WebSocket server & chat history storage
+- [x] Project scaffolding (Wrangler + Vite/React)
+- [/] Durable Object: WebSocket server & chat history storage
 - [ ] Workflow: Amadeus flight search (`step.do()`)
 - [ ] Workflow: Amadeus hotel search (`step.do()`)
 - [ ] Workflow: Foursquare activity search (`step.do()`)
@@ -54,6 +54,7 @@
 - [x] `tracker.md` created
 - [x] `PROMPTS.md` created
 - [x] `README.md` created
+- [x] Project scaffolding (Wrangler Worker + Vite/React frontend)
 
 ---
 

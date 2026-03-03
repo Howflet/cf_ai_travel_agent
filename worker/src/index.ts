@@ -1,4 +1,6 @@
-import { DurableObject } from "cloudflare:workers";
+// Re-export the Durable Object and Workflow classes so Wrangler can find them
+export { ChatSession } from "./ChatSession";
+export { TravelResearchWorkflow } from "./workflows";
 
 export interface Env {
     AI: Ai;
@@ -10,27 +12,23 @@ export interface Env {
     OPENWEATHERMAP_API_KEY: string;
 }
 
-// ── Durable Object: ChatSession ────────────────────────────
-export class ChatSession extends DurableObject<Env> {
-    async fetch(request: Request): Promise<Response> {
-        // TODO: Upgrade to WebSocket, manage chat history, orchestrate Workflows + AI
-        return new Response("ChatSession stub", { status: 200 });
-    }
-}
-
 // ── Worker entry point ─────────────────────────────────────
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
         const url = new URL(request.url);
 
-        // Route WebSocket / chat requests to the Durable Object
-        if (url.pathname.startsWith("/api/chat")) {
-            const sessionId = url.searchParams.get("session") ?? "default";
+        // Route: /api/chat/:sessionId → Durable Object
+        const chatMatch = url.pathname.match(/^\/api\/chat\/([^/]+)$/);
+        if (chatMatch) {
+            const sessionId = chatMatch[1];
             const id = env.CHAT_SESSION.idFromName(sessionId);
             const stub = env.CHAT_SESSION.get(id);
             return stub.fetch(request);
         }
 
-        return new Response("CF AI Travel Agent — Worker", { status: 200 });
+        // Health check / root
+        return new Response("CF AI Travel Agent — Worker is running", {
+            status: 200,
+        });
     },
 } satisfies ExportedHandler<Env>;
