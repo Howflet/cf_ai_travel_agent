@@ -204,3 +204,22 @@ Review `tracker.md`. We are now going to implement "The Voice: Intent Parsing" t
 </details>
 
 **Result:** (1) Per-invocation `callbackToken` generated via `crypto.getRandomValues()`, stored in DO storage, sent in `X-Callback-Token` header, verified + cleared on receipt. (2) `WORKER_BASE_URL` added to `Env` and `wrangler.toml [vars]` (defaults to `http://localhost:8787`). (3) `TRAVEL_KEYWORDS` regex gates intent parsing; `parseIntentAndRespond()` returns both params + reply in one call. (4) Split into `TravelSearchParams` (user-facing) and `TravelParams extends TravelSearchParams` (adds `callbackSessionId` + `callbackToken`).
+
+---
+
+## Prompt 8 — Frontend Chat UI (2026-03-03)
+
+**Purpose:** Implement the final component: a React/Vite chat frontend hosted on Cloudflare Pages as a pure presentation layer.
+
+<details>
+<summary>Full prompt</summary>
+
+1. Frontend Setup: Vite React app in `frontend/`, install `lucide-react` for icons and `tailwindcss` for styling.
+2. WebSocket State Management (`useChat.ts`): Random sessionId (persisted in sessionStorage), WebSocket connection with exponential backoff, state for messages/input/status/isConnected.
+3. Message Handling: Parse incoming JSON (message/status/history/error types), auto-scroll on new messages.
+4. UI Layout: Mobile-responsive chat container, user vs assistant bubbles, status bar with spinner, disabled send when disconnected or empty.
+5. Local Dev Config: Vite proxy for `/api/*` to `localhost:8787`.
+
+</details>
+
+**Result:** (1) `useChat.ts` custom hook — WebSocket lifecycle with `crypto.randomUUID()` session IDs, exponential backoff (1s–30s), handles message/status/history/error types. (2) `App.tsx` — dark gradient UI with glassmorphism, Plane/Bot/User/Send icons, message bubbles (right-aligned blue for user, left-aligned translucent for assistant), animated spinner status, suggestion chips, connection indicator. (3) `vite.config.ts` — `@tailwindcss/vite` plugin + `/api` proxy with `ws: true`. (4) Inter font via Google Fonts, SEO meta tags.

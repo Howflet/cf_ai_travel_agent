@@ -41,10 +41,10 @@
 - [x] Workflow: Foursquare activity search (`step.do()`)
 - [x] Workflow: Travel Advisory lookup (`step.do()`)
 - [x] Workflow: OpenWeatherMap weather lookup (`step.do()`)
-- [/] Workers AI: Intent parsing (destination, budget, dates)
-- [/] Workers AI: Response synthesis
-- [ ] Frontend: Chat UI with WebSocket connection
-- [ ] Frontend: Loading/typing indicators
+- [x] Workers AI: Intent parsing (destination, budget, dates)
+- [x] Workers AI: Response synthesis
+- [x] Frontend: Chat UI with WebSocket connection
+- [x] Frontend: Loading/typing indicators
 - [ ] End-to-end integration testing
 
 ---
@@ -57,8 +57,9 @@
 - [x] Project scaffolding (Wrangler Worker + Vite/React frontend)
 - [x] Durable Object: ChatSession with Hibernation API, durable history, Workers AI
 - [x] TravelAgentWorkflow: 7-step multi-API orchestration + callback
-- [/] Workers AI: Intent parsing (`parseUserIntent`) + Scenario A/B branching
-- [/] Workers AI: Response synthesis (`synthesizeResearchResponse`)
+- [x] Workers AI: Single combined intent+response call with keyword gating
+- [x] Workers AI: Response synthesis (`synthesizeResearchResponse`)
+- [x] Frontend: Chat UI (React/Vite, Tailwind, lucide-react, `useChat` hook)
 
 ---
 
